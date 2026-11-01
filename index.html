@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котёл ПРЕ и ПРИ</title>
+<link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--em:#00ff9d;--em2:#00c27a;--deep:#06241a;--bg:#010504;--tx:#d8fff0;--red:#ff2d5c;--glow:0 0 8px #00ff9d,0 0 22px rgba(0,255,157,.55)}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:radial-gradient(ellipse at 50% 0%,#07281d 0%,#010504 65%) fixed;color:var(--tx);font-family:'PT Serif',Georgia,serif;overflow-x:hidden}
+h1,h2,.fancy{font-family:'Philosopher','Palatino Linotype',Georgia,serif}
+.ico{filter:drop-shadow(0 0 6px var(--em)) drop-shadow(0 0 14px var(--em2));display:inline-block}
+#amb{position:fixed;inset:0;pointer-events:none;z-index:0}
+#amb span{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--em);box-shadow:0 0 10px 3px rgba(0,255,157,.7);opacity:0;animation:fly linear infinite}
+@keyframes fly{0%{transform:translate(0,0);opacity:0}15%{opacity:.9}100%{transform:translate(var(--dx),-110vh);opacity:0}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+#fx span{position:absolute;font-size:var(--s,18px);animation:burst .9s ease-out forwards;filter:drop-shadow(0 0 6px var(--c))}
+@keyframes burst{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.2);opacity:0}}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0}
+#flash.g{animation:fl .6s ease-out;background:radial-gradient(circle,rgba(0,255,157,.35),transparent 70%)}
+#flash.r{animation:fl .8s ease-out;background:radial-gradient(circle,rgba(255,45,92,.55),rgba(120,0,20,.3) 60%,transparent)}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+body.shake #app{animation:shake .6s}
+@keyframes shake{0%,100%{transform:none}10%{transform:translate(-14px,6px) rotate(-1deg)}25%{transform:translate(12px,-8px) rotate(1deg)}40%{transform:translate(-10px,-6px)}55%{transform:translate(9px,7px) rotate(-.6deg)}70%{transform:translate(-6px,3px)}85%{transform:translate(4px,-2px)}}
+#app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.screen{display:none}.screen.on{display:block}
+.title{text-align:center;padding-top:22px}
+h1{font-size:clamp(34px,8vw,58px);color:var(--em);text-shadow:var(--glow);letter-spacing:1px}
+.sub{margin:10px auto 22px;max-width:520px;opacity:.85;line-height:1.5}
+.runes{font-size:34px;letter-spacing:12px;margin:8px 0 18px}
+.btn{font:700 20px 'Philosopher',Georgia,serif;color:var(--em);background:linear-gradient(#0a3326,#04140e);border:2px solid var(--em);border-radius:14px;padding:12px 24px;cursor:pointer;text-shadow:0 0 8px var(--em);box-shadow:0 0 14px rgba(0,255,157,.45),inset 0 0 14px rgba(0,255,157,.2);transition:transform .15s,box-shadow .15s}
+.btn:hover:not(:disabled){transform:translateY(-3px) scale(1.03);box-shadow:0 0 26px var(--em),inset 0 0 18px rgba(0,255,157,.35)}
+.btn.sel{background:linear-gradient(#0f6b4c,#06301f);color:#fff;box-shadow:0 0 26px var(--em),inset 0 0 18px rgba(0,255,157,.5)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border:1px solid rgba(0,255,157,.45);border-radius:14px;background:rgba(2,18,12,.8);box-shadow:0 0 16px rgba(0,255,157,.2);font-family:'Philosopher',serif;font-size:18px}
+.bar{height:6px;border-radius:6px;background:#04140e;margin:10px 0 0;overflow:hidden;border:1px solid rgba(0,255,157,.3)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--em2),var(--em));box-shadow:0 0 10px var(--em);transition:width .4s}
+.stage{position:relative;margin-top:14px;text-align:center}
+.card{position:relative;z-index:1;margin:0 auto 6px;max-width:560px;min-height:104px;padding:18px 16px;display:flex;align-items:center;justify-content:center;font:700 clamp(24px,6vw,36px)/1.25 'Philosopher',Georgia,serif;border-radius:18px;border:2px solid var(--em);background:linear-gradient(160deg,#0b3a2b,#031510);box-shadow:var(--glow),inset 0 0 22px rgba(0,255,157,.18);animation:appear .5s ease-out}
+@keyframes appear{from{transform:translateY(-40px) scale(.8);opacity:0}}
+.gap{display:inline-block;min-width:.7em;margin:0 2px;border-bottom:4px solid var(--em);color:transparent;box-shadow:0 6px 10px -4px var(--em);animation:blink 1s infinite alternate}
+@keyframes blink{to{border-color:#b9ffe3;box-shadow:0 8px 14px -3px #b9ffe3}}
+.fill{color:#fff;text-shadow:0 0 10px var(--em),0 0 22px var(--em)}
+.card.drop{animation:drop .7s cubic-bezier(.5,0,.9,.6) forwards}
+@keyframes drop{0%{transform:none}55%{transform:translateY(120px) scale(.75) rotate(-4deg)}100%{transform:translateY(215px) scale(.15) rotate(8deg);opacity:0}}
+.card.burn{border-color:var(--red);box-shadow:0 0 14px var(--red),0 0 34px rgba(255,45,92,.6);animation:burn .7s forwards}
+@keyframes burn{0%{transform:none}30%{transform:translateY(110px) scale(.8)}100%{transform:translateY(60px) scale(1.4) rotate(14deg);opacity:0;filter:blur(6px)}}
+.cwrap{position:relative;width:290px;height:240px;margin:0 auto;z-index:2}
+.ring{position:absolute;left:-14px;top:-26px;width:318px;height:318px;border-radius:50%;border:2px dashed rgba(0,255,157,.35);box-shadow:0 0 30px rgba(0,255,157,.25),inset 0 0 40px rgba(0,255,157,.12);animation:spin 24s linear infinite;z-index:0}
+.ring:before{content:'✦ ᚠ ✧ ᚱ ✦ ᛟ ✧ ᚦ';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--em);opacity:.0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pot{position:absolute;left:25px;top:76px;width:240px;height:150px;border-radius:26% 26% 52% 52%/16% 16% 62% 62%;background:radial-gradient(circle at 30% 25%,#2c4a3f,#06100c 62%);box-shadow:0 0 28px rgba(0,255,157,.45),inset -14px -14px 30px #000,inset 0 0 26px rgba(0,255,157,.18);z-index:1}
+.rim{position:absolute;left:10px;top:56px;width:270px;height:52px;border-radius:50%;background:linear-gradient(#26413a,#07120e);border:3px solid #35594d;z-index:2;box-shadow:0 0 14px rgba(0,255,157,.5)}
+.brew{position:absolute;left:24px;top:62px;width:242px;height:38px;border-radius:50%;background:radial-gradient(ellipse,#6dffc0 0%,#00e68a 45%,#00663f 100%);box-shadow:0 0 26px var(--em),0 0 60px rgba(0,255,157,.5);z-index:3;transition:background .3s,box-shadow .3s}
+.cwrap.bad .brew{background:radial-gradient(ellipse,#ffb0c0,#ff2d5c 50%,#6a0018);box-shadow:0 0 30px var(--red),0 0 70px rgba(255,45,92,.7)}
+.cwrap.boom .pot,.cwrap.boom .rim{animation:boom .7s}
+@keyframes boom{0%{transform:none}20%{transform:scale(1.18,.86)}45%{transform:scale(.9,1.14) rotate(-3deg)}70%{transform:scale(1.06,.96) rotate(2deg)}100%{transform:none}}
+.cwrap.joy .brew{animation:joy .7s}
+@keyframes joy{50%{box-shadow:0 0 50px #fff,0 0 100px var(--em);transform:scale(1.07)}}
+.bub{position:absolute;bottom:14px;left:var(--x);width:var(--d);height:var(--d);border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,rgba(150,255,210,.55) 40%,rgba(0,255,157,.15));border:1px solid rgba(200,255,230,.8);box-shadow:0 0 8px var(--em);animation:rise var(--t) ease-in infinite;animation-delay:var(--w);opacity:0}
+@keyframes rise{0%{transform:translateY(8px) scale(.4);opacity:0}15%{opacity:1}85%{opacity:.9}100%{transform:translateY(var(--h)) scale(1.15);opacity:0}}
+.cwrap.bad .bub{animation-duration:.8s;border-color:#ffb0c0;box-shadow:0 0 8px var(--red)}
+.steam{position:absolute;left:var(--x);top:30px;width:34px;height:70px;border-radius:50%;background:radial-gradient(rgba(150,255,210,.28),transparent 70%);filter:blur(6px);animation:steam var(--t) ease-out infinite;animation-delay:var(--w);z-index:4;opacity:0}
+@keyframes steam{0%{transform:translateY(20px) scale(.6);opacity:0}30%{opacity:.8}100%{transform:translateY(-70px) scale(1.6);opacity:0}}
+.leg{position:absolute;bottom:2px;width:24px;height:26px;background:#0b1a15;border:2px solid #25463a;border-radius:0 0 10px 10px;z-index:0}
+.fire{position:absolute;bottom:-10px;left:90px;width:110px;height:34px;z-index:0;display:flex;justify-content:center;align-items:flex-end;gap:2px;font-size:30px}
+.fire span{animation:flick .5s infinite alternate;filter:drop-shadow(0 0 8px #00ff9d) hue-rotate(95deg)}
+.fire span:nth-child(2){animation-delay:.15s;font-size:38px}.fire span:nth-child(3){animation-delay:.3s}
+@keyframes flick{to{transform:translateY(-4px) scale(1.15)}}
+.act{margin-top:8px}
+.big{min-width:150px;font-size:26px;padding:14px 22px}
+.big small{display:block;font:400 13px 'PT Serif',serif;opacity:.8;text-shadow:none}
+.pop{display:none;margin-top:6px;padding:16px;border-radius:16px;border:2px solid var(--em);background:rgba(2,22,15,.92);box-shadow:var(--glow);text-align:center;animation:appear .35s}
+.pop.on{display:block}
+.pop.bad{border-color:var(--red);box-shadow:0 0 14px var(--red),0 0 30px rgba(255,45,92,.4)}
+.pop .verdict{font:700 22px 'Philosopher',serif;color:var(--em);text-shadow:0 0 10px var(--em)}
+.pop.bad .verdict{color:#ff7d99;text-shadow:0 0 10px var(--red)}
+.pop .w{font:700 28px 'Philosopher',serif;margin:6px 0}
+.pop .ex{font-size:19px;line-height:1.45;margin-bottom:12px}
+.pop .btn{font-size:17px;padding:10px 18px}
+.btn.add{border-color:#ff7d99;color:#ff9db3;text-shadow:0 0 8px var(--red);box-shadow:0 0 14px rgba(255,45,92,.45),inset 0 0 14px rgba(255,45,92,.2)}
+.btn.add:disabled{opacity:.7}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+.stat{padding:10px 18px;border:1px solid var(--em);border-radius:14px;background:rgba(2,18,12,.8);box-shadow:0 0 14px rgba(0,255,157,.3);text-align:center}
+.stat b{display:block;font:700 28px 'Philosopher',serif;color:var(--em);text-shadow:var(--glow)}
+.note{margin:14px auto;padding:14px 16px;border:2px dashed #ff7d99;border-radius:14px;background:rgba(60,0,16,.45);text-align:center;font:700 20px/1.4 'Philosopher',serif;color:#ffd0da;box-shadow:0 0 18px rgba(255,45,92,.35)}
+.errs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 20px}
+.err{padding:9px 12px;border-left:4px solid var(--em);border-radius:8px;background:rgba(3,24,17,.9);font-size:15px;line-height:1.35}
+.err b{display:block;font:700 19px 'Philosopher',serif;color:#fff;text-shadow:0 0 8px var(--em)}
+.err .star{color:#ffe36b}
+.win{text-align:center;font:700 26px 'Philosopher',serif;color:var(--em);text-shadow:var(--glow);margin:20px 0}
+@media(max-width:560px){.errs{grid-template-columns:1fr}.big{min-width:130px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<div id="amb"></div><div id="fx"></div><div id="flash"></div>
+<div id="app">
+
+<section class="screen on" id="s-start">
+  <div class="title">
+    <div class="runes"><span class="ico">🕯️</span><span class="ico">🔮</span><span class="ico">🦉</span><span class="ico">🪄</span><span class="ico">🕯️</span></div>
+    <h1>Котёл ПРЕ и ПРИ</h1>
+    <p class="sub">Брось слово в котёл и выбери правильную букву</p>
+    <p class="fancy" style="margin-bottom:12px">Режим игры</p>
+    <div class="row" id="modes" style="margin-bottom:22px"><button class="btn sel" data-m="0">Без жизней</button><button class="btn" data-m="1"><span class="ico">❤️</span> С жизнями (3)</button></div>
+    <p class="fancy" style="margin-bottom:12px">Сколько ингредиентов в зелье?</p>
+    <div class="row" id="counts"></div>
+  </div>
+</section>
+
+<section class="screen" id="s-game">
+  <div class="hud"><span><span class="ico">⚗️</span> <b id="score">0</b></span><span id="livesBox" style="display:none"></span><span><span class="ico">🔥</span> <span id="streak">0</span></span><span><span class="ico">📜</span> <span id="prog">1/1</span></span></div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="stage">
+    <div class="card" id="card"></div>
+    <div class="cwrap" id="cwrap">
+      <div class="ring"></div>
+      <div class="leg" style="left:52px"></div><div class="leg" style="right:52px"></div>
+      <div class="pot"></div><div class="rim"></div>
+      <div class="brew" id="brew"></div>
+      <div class="fire"><span>🔥</span><span>🔥</span><span>🔥</span></div>
+    </div>
+  </div>
+  <div class="act row" id="act">
+    <button class="btn big" id="bE" data-a="ПРЕ">ПРЕ<small>клавиша Е</small></button>
+    <button class="btn big" id="bI" data-a="ПРИ">ПРИ<small>клавиша И</small></button>
+  </div>
+  <div class="pop" id="pop"></div>
+</section>
+
+<section class="screen" id="s-end">
+  <div class="title"><h1 id="endT">Зелье готово</h1></div>
+  <div class="stats" id="endStats"></div>
+  <div id="endBody"></div>
+  <div class="row" style="margin-top:18px"><button class="btn" id="again">Сварить снова</button></div>
+</section>
+
+</div>
+<script>
+const RAW=`Пр_восходить (противника)
+ПРЕ = очень, перегнать
+
+Пр_митивный
+ПРИ. Нужно запомнить.
+
+Пр_вилегия
+ПРИ. Нужно запомнить.
+
+Пр_ забавный
+ПРЕ = очень
+
+Пр_ тензия
+ПРЕ. Нужно запомнить.
+
+Пр_бывать в классе
+ПРЕ = быть, находиться где-либо
+
+Негде голову пр_ клонить
+ПРИ = найти приют, место для ночлега или отдыха
+
+Пр_ творить дверь
+ПРИ = неплотно закрыть
+
+Пр_ терпеться к лишениям
+ПРИ = привыкнуть
+
+Пр_ дать форму
+ПРИ = добавить, дополнить
+
+Пр_ходящая няня
+ПРИ = та, кто приходит
+
+Пр_емник царя
+ПРЕ = наследник
+
+Пр_ терпеть удары судьбы
+ПРЕ = перетерпеть, пережить
+
+Пр_ бывать в тревоге
+ПРЕ = находиться, быть в тревожном состоянии
+
+Седой пр_вратник
+ПРИ = сторож при вратах
+
+Пр_ стольный праздник
+ПРЕ = торжество освященного престола
+
+Беспр_дельная даль
+ПРЕ = рубеж, граница
+
+Пр_ дел в храме
+ПРИ = пристройка
+
+Пр_сечь сплетни
+ПРЕ = прекратить
+
+Рассказ без пр_крас
+ПРИ. Нужно запомнить
+
+Дом пр_ зрения
+ПРИ = приют, забота о нуждающихся
+
+Пр_увеличить
+ПРЕ = очень, усилить
+
+Пр_украсить
+ПРИ = неполнота, чуть-чуть
+
+Пр_стольный град
+ПРЕ = где престол
+
+Пр_ступить к работе
+ПРИ = приблизиться, начать
+
+Пр_даться мечтам
+ПРЕ = передать себя, полностью отдаться
+
+Непр_ступная крепость
+ПРИ = нельзя взять приступом
+
+Пр_клонить колени
+ПРЕ = относиться с уважением
+
+Пр_солить блюдо
+ПРИ = добавить
+
+Пр_переть к стенке
+ПРИ = прижать
+
+Пр_вратности судьбы
+ПРЕ. Нужно запомнить
+
+Пр_ дать оттенок
+ПРИ = добавить
+
+Слегка пр_уменьшить
+ПРИ = неполнота, чуть-чуть
+
+Пр_мадонна
+ПРИ. Нужно запомнить
+
+Пр_амбула договора
+ПРЕ. Нужно запомнить
+
+Пр_воротное зелье
+ПРИ = приворот: притяжение
+
+Пр_ вередливый
+ПРИ. Нужно запомнить
+
+Беспр_кословно
+ПРЕ = прекословить = возражать
+
+Пр_дать осмеянию
+ПРЕ = передать
+
+Пр_старелый
+ПРЕ = очень
+
+Власти пр_держащие
+ПРЕ. Нужно запомнить
+
+Не пр_ минул заметить
+ПРЕ = не упустил случая, запомнить
+
+Пр_ рогатива
+ПРЕ. Нужно запомнить
+
+Старинное пр_дание
+ПРЕ = легенда
+
+Пр_дание силы
+ПРИ = добавление
+
+Пр_клоняться перед красотой
+ПРЕ = относиться с уважением
+
+Пр_клонить знамена
+ПРИ = склонить
+
+Пр_ клонить ветки в саду
+ПРИ = склонить
+
+Пр_клонить главу
+ПРЕ = выразить уважение
+
+Пр_зирать труса
+ПРЕ = считать недостойным
+
+Пр_тендент
+ПРЕ. Нужно запомнить
+
+Пр_творить планы
+ПРЕ = осуществить, воплотить
+
+Пр_ падать к плечу
+ПРИ. Нужно запомнить
+
+Пр_емлемый вариант
+ПРИ. Нужно запомнить
+
+Пр_чудливый
+ПРИ. Нужно запомнить
+
+Пр_одеть дочь
+ПРИ = принарядить
+
+Пр_земистый
+ПРИ. Нужно запомнить
+
+Пр_следовать свои цели
+ПРЕ. Нужно запомнить
+
+Пр_вратный смысл
+ПРЕ = изменчивый
+
+Пр_скорбный
+ПРИ. Нужно запомнить
+
+Пр_бывать в шоке
+ПРЕ = быть, находиться
+
+Пр_одолевать
+ПРЕ = пересилить`;
+const L=RAW.split('\n').map(s=>s.trim()).filter(Boolean),ALL=[];
+for(let i=0;i<L.length;i+=2)ALL.push({p:L[i].replace(/_\s+/g,'_'),t:L[i+1].slice(0,3),r:L[i+1]});
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));scrollTo(0,0)};
+const fillW=(w,hl)=>{const l=w.t==='ПРЕ'?'е':'и';return w.p.replace('_',hl?`<span class="fill">${l}</span>`:l)};
+let useLives=false,lives=3,Q,i,score,streak,best,okN,errs,added,locked,mode='idle';
+
+// ambient
+(()=>{const a=$('amb');for(let k=0;k<28;k++){const s=document.createElement('span');s.style.cssText=`left:${Math.random()*100}%;top:${60+Math.random()*50}%;--dx:${(Math.random()-.5)*160}px;animation-duration:${7+Math.random()*9}s;animation-delay:${-Math.random()*12}s`;a.appendChild(s)}})();
+// brew bubbles + steam
+(()=>{const b=$('brew');for(let k=0;k<16;k++){const e=document.createElement('i');e.className='bub';e.style.cssText=`--x:${8+Math.random()*84}%;--d:${6+Math.random()*13}px;--t:${1.4+Math.random()*1.8}s;--w:${-Math.random()*3}s;--h:${-(26+Math.random()*52)}px`;b.appendChild(e)}
+for(let k=0;k<4;k++){const e=document.createElement('i');e.className='steam';e.style.cssText=`--x:${20+k*55}px;--t:${3+Math.random()*2}s;--w:${-Math.random()*4}s`;$('cwrap').appendChild(e)}})();
+// buttons for counts
+document.querySelectorAll('#modes .btn').forEach(b=>b.onclick=()=>{useLives=b.dataset.m==='1';document.querySelectorAll('#modes .btn').forEach(x=>x.classList.toggle('sel',x===b))});
+[15,30,ALL.length].forEach(n=>{const b=document.createElement('button');b.className='btn';b.textContent=n===ALL.length?`Все ${n}`:n;b.onclick=()=>start(n);$('counts').appendChild(b)});
+
+function burst(x,y,list,n,spread){const f=$('fx');for(let k=0;k<n;k++){const s=document.createElement('span'),a=Math.random()*6.283,d=spread*(.4+Math.random());s.textContent=list[k%list.length];s.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-40}px;--r:${(Math.random()-.5)*540}deg;--s:${14+Math.random()*18}px;--c:${list===BAD?'#ff2d5c':'#00ff9d'}`;f.appendChild(s);setTimeout(()=>s.remove(),950)}}
+const GOOD=['✨','⭐','💚','🔮','✦'],BAD=['💥','🔥','☠️','⚡','💢'];
+const potPos=()=>{const r=$('brew').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+
+function start(n){Q=[...ALL].sort(()=>Math.random()-.5).slice(0,n);i=0;score=0;streak=0;best=0;okN=0;lives=3;errs=[];added=new Set();show('s-game');next()}
+function hud(){const b=$('livesBox');b.style.display=useLives?'inline':'none';if(useLives)b.innerHTML=[0,1,2].map(k=>`<span class="ico" style="${k<lives?'':'filter:grayscale(1) brightness(.4)'}">❤️</span>`).join(' ')}
+function next(){
+  if(i>=Q.length||(useLives&&lives<=0))return end();
+  locked=false;mode='ask';const w=Q[i];
+  $('pop').className='pop';$('act').style.display='flex';
+  $('bE').disabled=$('bI').disabled=false;
+  const c=$('card');c.className='card';void c.offsetWidth;c.className='card';
+  c.innerHTML=w.p.replace('_','<span class="gap">&nbsp;</span>');
+  $('cwrap').className='cwrap';
+  hud();$('score').textContent=score;$('streak').textContent=streak;$('prog').textContent=`${i+1}/${Q.length}`;
+  $('barfill').style.width=(i/Q.length*100)+'%';
+}
+function answer(a){
+  if(locked||mode!=='ask')return;locked=true;mode='wait';
+  const w=Q[i],ok=a===w.t,c=$('card'),cw=$('cwrap'),[x,y]=potPos();
+  $('bE').disabled=$('bI').disabled=true;
+  c.innerHTML=fillW(w,true);
+  if(ok){
+    okN++;streak++;best=Math.max(best,streak);score+=10+Math.min(streak-1,5)*2;
+    c.classList.add('drop');
+    setTimeout(()=>{cw.classList.add('joy');burst(x,y,GOOD,18,140);$('flash').className='';void $('flash').offsetWidth;$('flash').className='g'},520);
+  }else{
+    streak=0;errs.push(w);if(useLives)lives--;
+    c.classList.add('burn');
+    setTimeout(()=>{cw.classList.add('bad','boom');burst(x,y,BAD,30,230);document.body.classList.add('shake');$('flash').className='';void $('flash').offsetWidth;$('flash').className='r';setTimeout(()=>document.body.classList.remove('shake'),650)},300);
+  }
+  hud();$('score').textContent=score;$('streak').textContent=streak;
+  setTimeout(()=>explain(w,ok),ok?900:850);
+}
+function explain(w,ok){
+  const p=$('pop');mode='next';
+  p.className='pop on'+(ok?'':' bad');
+  p.innerHTML=`<div class="verdict">${ok?'Верно! Зелье крепнет':'Бабах! Котёл взорвался'}</div><div class="w">${fillW(w,true)}</div><div class="ex">${w.r}</div><div class="row">${ok?'':'<button class="btn add" id="addB">📖 Добавить в словарик</button>'}<button class="btn" id="nextB">Дальше</button></div>`;
+  $('act').style.display='none';
+  if(!ok)$('addB').onclick=e=>{added.add(w.p);e.target.textContent='★ В словарике';e.target.disabled=true};
+  $('nextB').textContent=(useLives&&lives<=0)?'К итогам':'Дальше';$('nextB').onclick=()=>{i++;next()};$('nextB').focus();
+}
+function end(){
+  mode='idle';show('s-end');
+  const n=i>Q.length?Q.length:Math.min(i,Q.length),pct=n?Math.round(okN/n*100):0;
+  $('endT').textContent=(useLives&&lives<=0)?'Жизни закончились':errs.length?'Зелье сварено':'Идеальное зелье!';
+  $('endStats').innerHTML=`<div class="stat"><b>${score}</b>очков</div><div class="stat"><b>${okN} из ${n}</b>верных (${pct}%)</div><div class="stat"><b>${best}</b>лучшая серия</div><div class="stat"><b>${errs.length}</b>ошибок</div>`;
+  $('endBody').innerHTML=errs.length
+   ?`<div class="note"><span class="ico">📸</span> Сделай скриншот и обязательно перепиши слова в свой словарик!</div><div class="errs">${errs.map(w=>`<div class="err"><b>${fillW(w,false)}${added.has(w.p)?' <span class="star">★</span>':''}</b>${w.r}</div>`).join('')}</div>`
+   :`<div class="win"><span class="ico">🏆</span> Ни одной ошибки. Котёл гордится тобой!</div>`;
+  burst(innerWidth/2,innerHeight/3,GOOD,26,260);
+}
+$('again').onclick=()=>show('s-start');
+$('bE').onclick=()=>answer('ПРЕ');$('bI').onclick=()=>answer('ПРИ');
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(mode==='ask'){if(k==='е'||k==='e')answer('ПРЕ');else if(k==='и'||k==='b')answer('ПРИ')}
+});
+</script>
+</body>
+</html>
